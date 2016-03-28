@@ -1,6 +1,8 @@
 ## django-graphql
 (WIP) Simple GraphQL bindings for Django models
 
+**Safety Note**: this is WIP and may undergo breaking changes for a little while.
+
 ### 3 steps to eternal happiness
 1. Declare serializer classes
 2. Instantiate a schema
@@ -13,7 +15,7 @@ Say we're modeling items moving through different containers. Each item can be i
 
 (See the [testapp](https://github.com/sean-adler/django-graphql/blob/master/tests/testapp/models.py))
 
-```
+```python
 class ItemInContainer(models.Model):
     entered = models.DateTimeField(default=timezone.now)
     left = models.DateTimeField(null=True, blank=True)
