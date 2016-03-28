@@ -45,7 +45,7 @@ class Item(DjangoType):
 
     @prefetch('containers')
     def get_current_container(self, obj, args, info):
-        return obj.current_container()
+        return obj.containers.get(itemincontainer__left__isnull=True)
 
     class Meta:
         model = models.Item
@@ -65,7 +65,7 @@ schema = DjangoSchema(T)
 ```python
 query_string = """
     {
-      item(name: "item_4") {
+      item(name: "item_2") {
         id
         name
         containers {
@@ -84,8 +84,8 @@ schema.execute(query_string).data
 >>> {
         'item':
             {
-                'id': 5,
-                'name': 'item_4',
+                'id': 3,
+                'name': 'item_2',
                 'containers': [
                     {
                         'id': 1,
@@ -102,14 +102,6 @@ schema.execute(query_string).data
                             {
                                 'id': 3,
                                 'name': 'item_2'
-                            },
-                            {
-                                'id': 4,
-                                'name': 'item_3'
-                            },
-                            {
-                                'id': 5,
-                                'name': 'item_4'
                             }
                         ]
                     },
@@ -118,8 +110,8 @@ schema.execute(query_string).data
                         'name': 'container_1',
                         'items': [
                             {
-                                'id': 5,
-                                'name': 'item_4'
+                                'id': 3,
+                                'name': 'item_2'
                             }
                         ]
                     }
