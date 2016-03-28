@@ -51,6 +51,7 @@ class GraphQLExecutionTests(TestCase):
               }
             }
         """)
+
         self.assertEqual(result.errors, [])
         self.assertDictEqual(
             result.data, {
@@ -114,9 +115,14 @@ class GraphQLExecutionTests(TestCase):
                         name
                     }
                 }
+                current_items {
+                    id,
+                    name
+                }
             }
         }
         """)
+
         self.assertDictEqual(
             result.data, {
             'container': {
@@ -162,6 +168,24 @@ class GraphQLExecutionTests(TestCase):
                             'id': 2,
                             'name': 'container_1'
                         }
+                    }
+                ],
+                'current_items': [
+                    {
+                        'id': 1,
+                        'name': 'item_0'
+                    },
+                    {
+                        'id': 2,
+                        'name': 'item_1'
+                    },
+                    {
+                        'id': 3,
+                        'name': 'item_2'
+                    },
+                    {
+                        'id': 4,
+                        'name': 'item_3'
                     }
                 ]
             }
