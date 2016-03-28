@@ -17,11 +17,9 @@ class Container(DjangoType):
     items = [T.Item]
     current_items = [T.Item]
 
-    @prefetch('items')
     def get_items(self, obj, args, info):
         return obj.items.all()
 
-    @prefetch('items')
     def get_current_items(self, obj, args, info):
         return obj.items.filter(itemincontainer__left__isnull=True)
 
@@ -39,11 +37,9 @@ class Item(DjangoType):
     containers = [T.Container]
     current_container = T.Container
 
-    @prefetch('containers')
     def get_containers(self, obj, args, info):
         return obj.containers.all()
 
-    @prefetch('containers')
     def get_current_container(self, obj, args, info):
         return obj.containers.get(itemincontainer__left__isnull=True)
 
@@ -119,3 +115,7 @@ schema.execute(query_string).data
             }
       }
 ```
+
+#### TODO
+- [ ] Explain how `@prefetch` method decorator works
+- [ ] SQL debugging example query
