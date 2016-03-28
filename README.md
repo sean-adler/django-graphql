@@ -3,7 +3,7 @@
 
 
 #### 3 steps to eternal happiness
-1. Declare `DjangoType` classes, one for each Django model, to act as your API layer
+1. Declare `DjangoType` classes for each Django model that you want to serialize
 2. Create your schema
 3. Pass GraphQL strings to `schema.execute()`
 
@@ -79,6 +79,7 @@ query_string = """
       }
     }
 """
+
 schema.execute(query_string).data
 >>> {
         'item':
