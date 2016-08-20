@@ -3,7 +3,7 @@ from django.utils import timezone
 
 from models import Container
 from models import Item
-from models import ItemInContainer
+from models import ContainerMovement
 from schema import schema
 
 
@@ -20,7 +20,7 @@ class GraphQLExecutionTests(TestCase):
         ]
 
         throughs = [
-            ItemInContainer.objects.create(
+            ContainerMovement.objects.create(
                 item=items[i],
                 container=containers[0])
             for i in range(5)
@@ -29,7 +29,7 @@ class GraphQLExecutionTests(TestCase):
         throughs[-1].left = timezone.now()
         throughs[-1].save()
 
-        ItemInContainer.objects.create(
+        ContainerMovement.objects.create(
             item=items[-1],
             container=containers[1])
 

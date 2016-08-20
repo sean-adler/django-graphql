@@ -23,8 +23,8 @@ class Container(DjangoType):
     """
     id = T.Int
     name = T.String
-    items = [T.Item]
-    current_items = [T.Item]
+    items = T.List(T.Item)
+    current_items = T.List(T.Item)
 
     @prefetch('items')
     def get_items(self, obj, args, info):
@@ -38,7 +38,7 @@ class Container(DjangoType):
         """
         Current items in container.
         """
-        return obj.items.filter(itemincontainer__left__isnull=True)
+        return obj.items.filter(containermovement__left__isnull=True)
 
     class Meta:
         model = models.Container
@@ -54,7 +54,7 @@ class Item(DjangoType):
     """
     id = T.Int
     name = T.String
-    containers = [T.Container]
+    containers = T.List(T.Container)
     current_container = T.Container
 
     @prefetch('containers')
