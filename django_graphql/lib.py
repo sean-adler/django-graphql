@@ -1,4 +1,3 @@
-import collections
 import functools
 import pprint
 from contextlib import contextmanager
@@ -92,7 +91,23 @@ class RegistryEntry(object):
         self.django_type = django_type
 
 
-TypeRef = collections.namedtuple('TypeRef', ['type', 'registry'])
+class TypeRef(object):
+    def __init__(self, typename, registry, is_list=False):
+        self.typename = typename
+        self.registry = registry
+        self.is_list = is_list
+
+    def __call__(self, typeref):
+        """
+        Enables parametrizing other `TypeRef`s, e.g. 'T.List'
+
+        # TODO: add support for DictType
+        """
+        if self.typename == 'List':
+            return type(self)(typeref.typename, self.registry, is_list=True)
+
+    def __repr__(self):
+        return 'TypeRef(%s)' % self.typename
 
 
 class TypeRegistry(object):
@@ -149,8 +164,13 @@ class TypeRegistry(object):
                     type_name, pprint.pformat(self._types), type_name))
         return self._types[type_name]
 
-    def __getattr__(self, type_name):
-        return TypeRef(type=type_name, registry=self)
+    def __getattr__(self, typename):
+        return TypeRef(typename=typename, registry=self)
+
+    def __repr__(self):
+        types = self._types.keys()
+        types_str = ', '.join(types)
+        return 'TypeRegistry(%s)' % types_str
 
 
 def prefetch(*fields):
@@ -199,18 +219,15 @@ class DjangoTypeMeta(type):
 
         for attrname, attrvalue in attrs.iteritems():
             if isinstance(attrvalue, TypeRef):
-                self._fields.append((attrname, attrvalue))
+                if attrvalue.is_list:
+                    self._list_fields.append((attrname, attrvalue))
+                else:
+                    self._fields.append((attrname, attrvalue))
                 registry_set.add(attrvalue.registry)
-            elif isinstance(attrvalue, list):
-                if len(attrvalue) != 1 or not isinstance(attrvalue[0], TypeRef):
-                    raise RuntimeError(
-                        "Expected list to contain a single registered TypeRef, "
-                        "saw: %r" % attrvalue)
-                typeref = attrvalue[0]
-                self._list_fields.append((attrname, typeref))
-                registry_set.add(typeref.registry)
+
             elif getattr(attrvalue, '_is_prefetch', False):
                 self._prefetch[attrname] = attrvalue._prefetch
+
             elif getattr(attrvalue, '_is_mutation', False):
                 self._mutations.append(attrvalue)
 
@@ -242,14 +259,14 @@ class DjangoType(object):
     def get_fields(cls):
         fields = {
             name: GraphQLField(
-                cls.registry._get_graphql_type(typeref.type),
+                cls.registry._get_graphql_type(typeref.typename),
                 description=cls._get_resolver(name).__doc__,
                 resolver=cls._get_resolver(name))
             for name, typeref in cls._fields
         }
         fields.update({
             name: GraphQLField(
-                GraphQLList(cls.registry._get_graphql_type(typeref.type)),
+                GraphQLList(cls.registry._get_graphql_type(typeref.typename)),
                 description=cls._get_resolver(name).__doc__,
                 resolver=cls._get_resolver(name))
             for name, typeref in cls._list_fields
@@ -271,7 +288,8 @@ class DjangoType(object):
     @classmethod
     def get_root_args(cls):
         return {
-            field_name: GraphQLArgument(type=cls.registry._get_graphql_type(typeref.type))
+            field_name: GraphQLArgument(
+                type=cls.registry._get_graphql_type(typeref.typename))
             for field_name, typeref in cls._fields
             if field_name in cls.Meta.filters
         }
