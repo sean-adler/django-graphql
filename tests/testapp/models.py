@@ -2,7 +2,7 @@ from django.db import models
 from django.utils import timezone
 
 
-class ContainerMovement(models.Model):
+class ItemMovement(models.Model):
     entered = models.DateTimeField(default=timezone.now)
     left = models.DateTimeField(null=True, blank=True)
     item = models.ForeignKey('Item')
@@ -14,7 +14,7 @@ class Item(models.Model):
 
     def current_container(self):
         current_container = [
-            through.container for through in self.containermovement_set.all()
+            through.container for through in self.itemmovement_set.all()
             if through.left is None
         ]
         if not current_container:
@@ -27,5 +27,5 @@ class Container(models.Model):
     name = models.CharField(max_length=100, unique=True)
     items = models.ManyToManyField(
         Item,
-        through=ContainerMovement,
+        through=ItemMovement,
         related_name='containers')

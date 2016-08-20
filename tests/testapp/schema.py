@@ -38,7 +38,7 @@ class Container(DjangoType):
         """
         Current items in container.
         """
-        return obj.items.filter(containermovement__left__isnull=True)
+        return obj.items.filter(itemmovement__left__isnull=True)
 
     class Meta:
         model = models.Container
