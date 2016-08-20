@@ -29,14 +29,14 @@ class Container(DjangoType):
     @prefetch('items')
     def get_items(self, obj, args, info):
         """
-        All items in container.
+        All items that were ever in this container.
         """
         return obj.items.all()
 
     @prefetch('items')
     def get_current_items(self, obj, args, info):
         """
-        Current items in container.
+        All items currently in this container.
         """
         return obj.items.filter(itemmovement__left__isnull=True)
 
